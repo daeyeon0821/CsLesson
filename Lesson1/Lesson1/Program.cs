@@ -7,7 +7,7 @@ namespace Lesson1
     {
         static void Main(string[] args)
         {
-            Operator();
+            SumOfGrade();
         }
 
         //! 프로그래밍이란 무엇인지 용어와 함께 소개한다.
@@ -315,7 +315,143 @@ namespace Lesson1
         //! 연산자에 대해 설명한다.
         public static void Operator() 
         {
+            /**
+             * 연산자
+             * 데이터로 연산 작업을 수행할 때는 연산자(Operator)를 사용한다. 연산자는 기능에 따라 대입, 산술, 
+             * 관계, 논리, 증감, 조건, 비트, 시프트 연산자 등으로 나누며, 이용 형태에 따라 항 1개로 연산을 하는
+             * 단항(Unary) 연산자와 항 2개로 연산을 하는 이항(Bibary) 연산자, 항 3개로 연산을 하는 삼항(Ternary)
+             * 연산자로 나눈다.
+             * 
+             * 단항 연산자
+             * 단항 연산자는 연산자와 피연산자 하나로 식을 처리한다.
+             * ex) [연산자] [피연산자]
+             * + 연산자: 특정 정수형 변수 값을 그대로 출력한다.
+             * - 연산자: 특정 정수형 변수 값을 음수로 변경하여 출력한다. 음수 값이 들어 있다면 양수로 변환해서
+             *          반환한다.
+             * 
+             * 이항 연산자
+             * 이항 연산자는 연산자와 피연산자 2개로 식을 처리한다.
+             * ex) [피연산자1] [연산자] [피연산자2]
+             * 
+             * 삼항 연산자
+             * 삼항 연산자는 식 1개의 항과 그 결과에 따른 피연산자 각 1개씩 총 2개 항으로 식을 처리한다.
+             * ex) (식) ? 피연산자1 : 피연산자2
+             * 
+             * 식과 문
+             * 값 하나 또는 연산을 진행하는 구문의 계산식을 식(Expression) 또는 표현식이라고 한다. 표현식을 사용하여
+             * 명령 하나를 진행하는 구문을 문(Statement) 또는 문장이라고 한다.
+             */
 
+            // 단항 연산자
+            const int PLUS_FIVE = +5;
+            const int MINUS_FIVE = -5;
+
+            // 이상 연산자
+            const int PLUS_TEN = 5 + 5;
+
+            // 삼항 연산자
+            string compareTen = (PLUS_FIVE > 10) ? "{0}은(는) 10 보다 크다" : "{0}은(는) 10 보다 크지 않다";
+            Console.WriteLine(compareTen, PLUS_FIVE);
+
+            // 변환 연산자
+            // () 기호를 사용하여 특정 값을 원하는 데이터 형식으로 변환할 수 있다.
+            const int PI_INT = (int)3.141592;
+            const float PI_FLOAT = (float)3.141592;
+
+            /**
+             * 산술 연산자
+             * 더하기(Add), 빼기(Subtract), 곱하기(Multiply), 나누기(Divide), 나머지(Remainder, Modulus) 등
+             * 수학적 연산을 하는 데 사용한다. 보통 정수 형식과 실수 형식의 산술 연산에 사용한다.
+             * ex) +, -, *, /, %
+             */
+
+            /**
+             * 문자열 연결 연산자
+             * 산술 연산자 중 하나인 + 연산자는 피연산자의 데이터 타입에 따라 산술 연산 또는 문자열 연결 연산을 
+             * 수행한다.
+             * 
+             * + 연산자: 두 항이 숫자일 때는 산술(+) 연산 기능, 문자열일 때는 문자열 연결 기능
+             */
+
+            string addMessage = "String " + "plus " + "string";
+            Console.WriteLine(addMessage);
+
+            /**
+             * 할당 연산자
+             * 할당 연산자(Assignment operator)는 변수에 데이터를 대입하는 데 사용한다. 할당 연산자를 대입 연산자
+             * 라고도 한다. C#에서 = 기호는 같다는 의미가 아니라 오른쪽에 있는 값 도는 식의 결과를 왼쪽 변수에 할당
+             * 하라고 지시하는 것이다.
+             * 
+             * ex) =, +=, -=, *=, /=, %=
+             */
+
+            /**
+             * 증감 연산자(Increment / Decrement operator)
+             * 변수 값을 1 증가시키거나 1 감소시키는 연산자이다. 증감 연산자가 변수 앞에 위치하느냐, 뒤에 위치하느냐에
+             * 따라 연산 처리 우선순위가 결정된다.
+             * 
+             * ++(증가 연산자): 변수 값에 1을 더한다.
+             * --(감소 연산자): 변수 값에 1을 뺀다.
+             * 
+             * 증감 연산자가 앞에 붙으면 전위 증감 연산자라고 하며, 변수 뒤에 붙으면 후위 증감 연산자라고 한다.
+             * 
+             * 전위(prefix) 증감 연산자: 정수형 변수 앞에 연산자가 위치하여 변수 값을 미리 증감한 후 나머지 연산을
+             *                          수행한다.
+             * 후위(postfix) 증감 연산자: 정수형 변수 뒤에 연산자가 위치하여 연산식(대입)을 먼저 실행한 후 
+             *                          나중에 변수 값을 증감한다.
+             */
+
+            int indexNumber = 0;
+            int prefix = ++indexNumber;
+            int postfix = indexNumber++;
+            Console.WriteLine("Prefix: {0}, Postfix: {1}, indexNumber: {2}", prefix, postfix, indexNumber);
+            indexNumber = indexNumber++;
+            Console.WriteLine("indexNumber: {0}", indexNumber);
+
+            /**
+             * 관계형 연산자
+             * 관계형 연산자(Relational operator) 또는 비교 연산자(Comparative operator)는 두 항이 큰지, 작은지
+             * 또는 같은지 등을 비교하는 데 사용한다. 관계형 연산자의 결괏값은 논리 데이터 형식인 참(True), 또는 
+             * 거짓(False)으로 출력된다.
+             * ex) <, <=, >, >=, ==, !=
+             * 
+             * 논리 연산자
+             * 논리 연산자(Logical operator)는 논리곱(AND), 논리합(OR), 논리부정(NOT)의 조건식에 대한 논리 연산을
+             * 수행한다. 연산의 결과 값은 참 또는 거짓의 bool 형식으로 반환되어 Boolean 연산자라고도 한다.
+             * ex) &&, ||, !
+             * 
+             * 비트 연산자
+             * 비트 연산자(Bit operator)는 정수형 데이터의 값을 이진수 비트 단위로 연산을 수행할 때 사용한다.
+             * ex) &, |, ^, ~
+             * 
+             * 시프트 연산자
+             * 시프트 연산자(Shift operator)는 정수 데이터가 담겨 있는 메모리의 비트를 왼쪽 또는 오른쪽으로 지정한
+             * 비트만큼 이동시킨다.
+             * ex) <<, >>
+             * 
+             * 조건 연산자
+             * 조건 연산자(Conditional operator)는 조건에 따라서 참일 때와 거짓일 때 결과를 다르게 반환하며, 
+             * (조건식) ? (식1 또는 값1) : (식2 또는 값2) 형태의 연산자이다. if~else 문의 축약형이기도 하다.
+             */
+
+            // 나열(콤마) 연산자
+            // 콤마를 구분자로 하여 한 문장에 변수 여러 개를 선언할 때 사용한다.
+            int intNumber1, intNumber2, intNumber3 = 0;
+
+            /**
+             * sizeof 연산자
+             * sizeof 연산자는 단항 연산자로 데이터 형식 자체의 크기를 구하는 데 사용한다.
+             * sizeof([데이터 타입]) 형태로 사용하며, 운영 체제와 CPU 아키텍쳐의 종류에 따라 결괏값이 다르게
+             * 나올 수 있다.
+             */
+
+            Console.WriteLine("int의 메모리 크기는 {0}바이트입니다.", sizeof(int));
+
+            /**
+             * 연산자 우선순위
+             * 연산자 여러 개를 함께 사용할 때는 연산자 우선순위(Precedence)에 따라 계산된다.
+             * 연산자 우선순위를 잘 모를 때는 일단 괄호 연산자부터 잘 사용하도록 연습하는게 좋다.
+             */
         }       // Operator()
 
         #region Lab Chapter1
@@ -453,8 +589,72 @@ namespace Lesson1
             powMeter = flatOfRoom * ONE_FLAT_OF_ROOM;
             Console.WriteLine($"평방미터 : {powMeter:F3}");
         }
+
+        /**
+         * 시, 분, 초로 표현된 시간을 초 단위의 시간으로 변환하는 프로그램을 작성
+         * ex) 1시, 1분, 1초 -> 3661초
+         */
+        public static void ConvertTimeToSeconds()
+        {
+            int hour, minute, second = 0;
+            int fullySeconds = 0;
+            const int TIME_CONVERTER = 60;
+
+            Console.Write("시 : ");
+            int.TryParse(Console.ReadLine(), out hour);
+            Console.Write("분 : ");
+            int.TryParse(Console.ReadLine(), out minute);
+            Console.Write("초 : ");
+            int.TryParse(Console.ReadLine(), out second);
+
+            // hour to minute
+            minute = minute + (hour * TIME_CONVERTER);
+            fullySeconds = second + (minute* TIME_CONVERTER);
+            Console.WriteLine("전체 초 : {0}", fullySeconds);
+        }       // ConvertTimeToSeconds()
+
+        /**
+         * 구의 표면적과 체적을 구하는 프로그램을 작성
+         * 구의 반지름은 실수로 입력 받는다
+         */
+        public static void SurfaceVolumeOfCircle()
+        {
+            float halfLength = 0.0f;
+            Console.Write("반지름 : ");
+            float.TryParse(Console.ReadLine(), out halfLength);
+
+            float surface = 4.0f * MathF.PI * (halfLength * halfLength);
+            float volume = 4.0f / 3.0f * MathF.PI * MathF.Pow(halfLength, 3);
+            Console.WriteLine("구의 표면적 : {0:F2}", surface);
+            Console.WriteLine("구의 부피 : {0:F2}", volume);
+        }
+
+        /**
+         * 퀴즈, 중간고사, 기말고사의 성적을 사용자로부터 입력받아서 성적 총합을 계산하는 프로그램 작성
+         */
+        public static void SumOfGrade()
+        {
+            const string quizFormat = "퀴즈 {0} 성적: ";
+            int gradeQuiz1, gradeQuiz2, gradeQuiz3 = 0;
+            int gradeMiddle, gradeLast = 0;
+
+            Console.Write(quizFormat, "#1".PadLeft(4, ' '));
+            int.TryParse(Console.ReadLine(), out gradeQuiz1);
+            Console.Write(quizFormat, "#2".PadLeft(4, ' '));
+            int.TryParse(Console.ReadLine(), out gradeQuiz2);
+            Console.Write(quizFormat, "#3".PadLeft(4, ' '));
+            int.TryParse(Console.ReadLine(), out gradeQuiz3);
+            Console.Write("중간고사 {0}", "성적: ".PadLeft(5, ' '));
+            int.TryParse(Console.ReadLine(), out gradeMiddle);
+            Console.Write("기말고사 {0}", "성적: ".PadLeft(5, ' '));
+            int.TryParse(Console.ReadLine(), out gradeLast);
+            Console.WriteLine("==========================");
+            Console.WriteLine("성적 총합: {0}", 
+                gradeQuiz1 + gradeQuiz2 + gradeQuiz3 + gradeMiddle + gradeLast);
+            Console.WriteLine("==========================");
+        }       // SumOfGrade()
         #endregion      //  Programming Exercise Chapter1
-    }
+    }       // Program class
 
     //public class Program2
     //{
