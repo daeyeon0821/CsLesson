@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
+using System.Data.SqlTypes;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +14,7 @@ namespace Lesson2
     {
         static void Main(string[] args)
         {
-            ForeachLoop();
+            TicTacToeGame();
         }
 
         //! 제어문 소개
@@ -177,6 +180,15 @@ namespace Lesson2
              * 시작하게 만든다. 반복 루프에서 continue 문을 만나게 되면 continue 문 다음에 있는 후속 코드들은
              * 실행되지 않고 건너뛰게 된다.
              */
+
+            // 1~100 중 3의 배수를 제외한 수의 합 구하기
+            int sumWithout3Multiple = 0;
+            for(int index = 1; index <= 100; index++)
+            {
+                if(index % 3 == 0) { continue; }
+                sumWithout3Multiple += index;
+            }
+            Console.WriteLine("3의 배수를 제외한 정수의 합 (1~100): {0}", sumWithout3Multiple);
         }       // ForLoop()
 
         //! foreach 소개하기
@@ -195,6 +207,85 @@ namespace Lesson2
                 Console.Write("{0} ", oneCharactor);
             }
         }       // ForeachLoop()
+
+        //! 배열 소개하기
+        public static void ArrayType()
+        {
+            /**
+             * 컬렉션
+             * 이름 하나로 데이터 여러 개를 담을 수 있는 자료 구조를 컬렉션(Collection) 또는 컨테이너(Container)
+             * 라고 한다. C#에서 다루는 컬렉션은 배열(Array), 리스트(List), 사전(Dictinary) 등이 있다.
+             * 
+             * 배열
+             * 배열(Array)은 같은 종류의 데이터들이 순차적으로 메모리에 저장되는 자료 구조이다. 각각의 데이터들은 
+             * 인덱스(번호)를 사용하여 독립적으로 접근된다. 배열을 사용하면 편리하게 데이터를 모아서 관리할 수 있다.
+             * 배열 하나에는 데이터 형식 한 종류만 보관할 수 있다.
+             * 배열은 메모리의 연속된 공간을 미리 할당하고, 이를 대괄호([])와 0부터 시작하는 정수형 인덱스를 사용하여
+             * 접근할 수 있다.
+             * 배열을 선언할 때는 new 키워드로 배열을 생성한 후 사용할 수 있다.
+             * 배열에서 값 하나는 요소(Element) 또는 항목(Item)으로 표현한다.
+             * 필요한 데이터 개수를 정확히 정한다면 메모리를 적게 사용하여 프로그램 크기가 작아지고 성능이 향상된다.
+             * 
+             * 배열에는 세 가지 종류가 있다.
+             * 1차원 배열: 배열의 첨자를 하나만 사용하는 배열
+             * 다차원 배열: 첨자 2개 이상을 사용하는 배열 (2차원, 3차원 ...)
+             * 가변(Jagged) 배열: '배열의 배열'이라고도 하며, 이름 하나로 다양한 차원의 배열을 표현
+             */
+
+            // 배열 선언과 초기화
+            int[] sales = new int[5] { 100, 200, 300, 400, 500 };
+
+            // 배열의 Length 필드
+            for(int index = 0; index < sales.Length; index++)
+            {
+                Console.Write("{0} ", sales[index]);
+            }
+            Console.WriteLine("");
+            Console.WriteLine("");
+
+            /**
+             * 다차원 배열
+             * 2차원 배열, 3차원 배열처럼 차원이 2 이상인 배열을 다차원 배열이라고 한다.
+             * C#에서 배열을 선언할 때는 콤마를 기준으로 차원을 구분한다.
+             */
+
+            int[] oneArray = new int[2] { 1, 2 };
+            int[,] twoArray = new int[2, 2] { { 1, 2 }, { 3, 4 } };
+            int[,,] threeArray = new int[2, 2, 2] { { { 1, 2 }, { 3, 4 } }, { { 5, 6 }, { 7, 8 } } };
+
+            // 3행 3열짜리 배열에서 행과 열이 같으면 1, 다르면 0을 출력
+            twoArray = new int[3, 3];
+
+            for (int y = 0; y <= twoArray.GetUpperBound(0); y++)
+            {
+                for (int x = 0; x <= twoArray.GetUpperBound(1); x++)
+                {
+                    if(x == y) { twoArray[y, x] = 1; }
+                    else { twoArray[y, x] = 0; }
+
+                    Console.Write("{0} ", twoArray[y, x]);
+                }
+                Console.WriteLine("");
+            }       // loop
+            Console.WriteLine();
+
+            /**
+             * 가변 배열
+             * 차원이 2개 이상인 배열은 다차원 배열이고, 배열 길이가 가변 길이인 배열은 가변 배열이라고 한다.
+             */
+
+            int[][] zagArray = new int[2][];
+            zagArray[0] = new int[] { 1, 2 };
+            zagArray[1] = new int[] { 3, 4, 5 };
+            for(int y = 0; y <= zagArray.GetUpperBound(0); y++)
+            {
+                for(int x = 0; x < zagArray[y].Length; x++)
+                {
+                    Console.Write("{0} ", zagArray[y][x]);
+                }
+                Console.WriteLine();
+            }       // loop
+        }       // ArrayType()
 
         #region Chapter 02 Lab
         /**
@@ -429,6 +520,346 @@ namespace Lesson2
             }       // while
             Console.WriteLine("맞았습니다.");
         }       // RandomArithmeticQuiz()
+
+        /**
+         * 배열에서 최대값 찾기
+         * 크기가 100인 배열을 1~100 사이의 난수로 채움
+         * 그 중 최대값을 찾아서 출력
+         */
+        public static void FindMaxValueAtArray()
+        {
+            Random randomNumber = new Random();
+            const int ARRAY_SIZE = 100;
+            int[] numberArray = new int[ARRAY_SIZE];
+
+            int loopIndex = 0;
+            for(loopIndex = 0; loopIndex < numberArray.Length; loopIndex++)
+            {
+                numberArray[loopIndex] = randomNumber.Next(1, ARRAY_SIZE + 1);
+            }
+
+            int maxNumber = 0;
+            int maxLocation = 0;
+            loopIndex = 0;
+            foreach(int number in numberArray)
+            {
+                loopIndex++;
+                if(maxNumber <= number) 
+                {
+                    maxNumber = number;
+                    maxLocation = loopIndex;
+                }
+                Console.Write("{0}".PadRight(4, ' '), number);
+
+                if(loopIndex % 10 == 0) { Console.WriteLine(); }
+            }       // loop
+            Console.WriteLine();
+            Console.WriteLine("최대값: {0}, 최대값 위치: {1} 번째 숫자", maxNumber, maxLocation);
+        }       // FindMaxValueAtArray()
+
+        /**
+         * 사과를 제일 좋아하는 사람 찾기
+         * 10 명의 사람에게 아침에 먹는 사과의 수를 입력 받음.
+         * 누가 가장 사과를 적게 먹는지, 많이 먹는지 출력.
+         * 정렬해서 출력
+         */
+        public static void FindMostLikeApple()
+        {
+            const int INPUT_COUNT = 5;
+            int loopIndex = 0;
+            int[] appleArray = new int[INPUT_COUNT];
+
+            int maxApple = int.MinValue;
+            int maxLocation = 0;
+            int minApple = int.MaxValue;
+            int minLocation = 0;
+            // 사과의 수를 입력받음
+            for(loopIndex = 0; loopIndex < appleArray.Length; loopIndex++)
+            {
+                Console.Write("아침에 먹는 사과의 개수: ");
+                int.TryParse(Console.ReadLine(), out appleArray[loopIndex]);
+
+                if (appleArray[loopIndex] <= minApple) 
+                { 
+                    minApple = appleArray[loopIndex];
+                    minLocation = loopIndex + 1;
+                }
+                if (maxApple <= appleArray[loopIndex]) 
+                { 
+                    maxApple = appleArray[loopIndex]; 
+                    maxLocation = loopIndex + 1;
+                }
+            }       // loop
+
+            Console.WriteLine("가장 적은 사과를 먹은 사람은 {0} 번째", minLocation);
+            Console.WriteLine("가장 많은 사과를 먹은 사람은 {0} 번째", maxLocation);
+
+            // 여기서 정렬
+            int tempValue = 0;
+            for(loopIndex = 0; loopIndex < appleArray.Length; loopIndex++)
+            {
+                for(int elementIdx = 0; elementIdx < (appleArray.Length - loopIndex); elementIdx++)
+                {
+                    if(elementIdx.Equals(appleArray.Length - 1)) { break; }
+                    if (appleArray[elementIdx+1] <= appleArray[elementIdx])
+                    {
+                        tempValue = appleArray[elementIdx];
+                        appleArray[elementIdx] = appleArray[elementIdx+1];
+                        appleArray[elementIdx+1] = tempValue;
+                    }       // if: 현재 인덱스가 다음 인덱스의 값보다 큰 경우 스왑
+                }       // loop: 루프가 돌 때마다 서치 범위를 전체 배열의 길이에서 한 칸씩 줄임
+            }       // loop
+
+            // 여기서 정렬한 배열 출력
+            Console.WriteLine();
+            Console.WriteLine("사과의 갯수 정렬");
+            foreach (int element in appleArray)
+            {
+                Console.Write("{0}".PadRight(4, ' '), element);
+            }       // loop
+            Console.WriteLine();
+        }       // FindMostLikeApple()
+
+        /**
+         * Tic-Tac-Toe 게임
+         * 컴퓨터와 사람이 번갈아 가면서 o, x 를 둔다.
+         * 보드 크기는 3 x 3
+         * 컴퓨터의 룰은 간단하게
+         * 1. 중앙이 비었으면 중앙 선점
+         * 2. 이후에 빈자리 적당히 찾아서 둔다
+         */
+        enum TicTacToePlayerType
+        {
+            NONE = 0, PLAYER, COMPUTER
+        }
+        public static void TicTacToeGame()
+        {
+            int[,] gameBoard = new int[3, 3];
+            int playerX, playerY = 0;
+            bool isValidLocation = false;
+            bool isPlayerTurn = false;
+            bool isGameOver = false;
+
+            string playerIcon = string.Empty;
+            string playerType = string.Empty;
+
+            while (isGameOver == false)
+            {
+                // 플레이어 턴 진행
+                isPlayerTurn = true;
+                playerType = "[플레이어]";
+                // { 플레이어에게서 좌표를 입력 받는다
+                playerX = 0;
+                playerY = 0;
+                isValidLocation = false;
+                while (true)
+                {
+                    if (isValidLocation == true) { break; }
+
+                    // 플레이어 턴 / 좌표 입력 받음
+                    Console.Write("[플레이어] (x) 좌표: ");
+                    int.TryParse(Console.ReadLine(), out playerX);
+                    Console.Write("[플레이어] (y) 좌표: ");
+                    int.TryParse(Console.ReadLine(), out playerY);
+
+                    if (gameBoard[playerY, playerX].Equals((int)TicTacToePlayerType.NONE))
+                    {
+                        gameBoard[playerY, playerX] = (int)(TicTacToePlayerType.PLAYER);
+                        isValidLocation = true;
+                    }       // if: 보드가 빈 곳인 경우
+                    else
+                    {
+                        Console.WriteLine("[System] 해당 좌표는 비어있지 않습니다. / 다른 좌표를 입력하세요");
+                        isValidLocation = false;
+                    }       // else: 보드가 빈 곳이 아닌 경우
+                }       // loop: 플레이어의 좌표 입력을 받는 루프
+                // } 플레이어에게서 좌표를 입력 받는다
+
+                // { 플레이어의 턴 진행을 보드에 출력한다
+                for (int y = 0; y <= gameBoard.GetUpperBound(0); y++)
+                {
+                    Console.WriteLine("---|---|---");
+                    for (int x = 0; x <= gameBoard.GetUpperBound(1); x++)
+                    {
+                        switch (gameBoard[y, x])
+                        {
+                            case (int)TicTacToePlayerType.PLAYER:
+                                playerIcon = "O";
+                                break;
+                            case (int)TicTacToePlayerType.COMPUTER:
+                                playerIcon = "X";
+                                break;
+                            default:
+                                playerIcon = " ";
+                                break;
+                        }       // switch
+                        Console.Write(" {0} ", playerIcon);
+
+                        // Print Separator
+                        if (x == gameBoard.GetUpperBound(1)) { /* Do nothing */ }
+                        else { Console.Write("|"); }
+                    }       // loop: 한 줄에서 출력할 내용을 연산한다
+                    Console.WriteLine();
+                }       // loop
+                Console.WriteLine("---|---|---");
+                // } 플레이어의 턴 진행을 보드에 출력한다
+
+                // { 게임이 끝났는지 보드 검사
+                Console.WriteLine();
+                isGameOver = false;
+                for (int y = 0; y <= gameBoard.GetUpperBound(0); y++)
+                {
+                    if (gameBoard[y, 0].Equals((int)TicTacToePlayerType.PLAYER) &&
+                        gameBoard[y, 1].Equals((int)TicTacToePlayerType.PLAYER) &&
+                        gameBoard[y, 2].Equals((int)TicTacToePlayerType.PLAYER))
+                    {
+                        isGameOver = true;
+                    }
+                    else { continue; }
+                }       // loop: 가로 방향으로 검사
+
+                for (int x = 0; x <= gameBoard.GetUpperBound(1); x++)
+                {
+                    if (gameBoard[0, x].Equals((int)TicTacToePlayerType.PLAYER) &&
+                        gameBoard[1, x].Equals((int)TicTacToePlayerType.PLAYER) &&
+                        gameBoard[2, x].Equals((int)TicTacToePlayerType.PLAYER))
+                    {
+                        isGameOver = true;
+                    }
+                    else { continue; }
+                }       // loop: 세로 방향으로 검사
+
+                // 대각선 방향으로 검사
+                if (gameBoard[0, 0].Equals((int)TicTacToePlayerType.PLAYER) &&
+                    gameBoard[1, 1].Equals((int)TicTacToePlayerType.PLAYER) &&
+                    gameBoard[2, 2].Equals((int)TicTacToePlayerType.PLAYER))
+                {
+                    isGameOver = true;
+                }
+                if (gameBoard[0, 2].Equals((int)TicTacToePlayerType.PLAYER) &&
+                    gameBoard[1, 1].Equals((int)TicTacToePlayerType.PLAYER) &&
+                    gameBoard[2, 0].Equals((int)TicTacToePlayerType.PLAYER))
+                {
+                    isGameOver = true;
+                }
+                // } 게임이 끝났는지 보드 검사
+
+                if (isGameOver) { break; }
+
+                // 게임이 끝나지 않은 경우 턴을 교체한다
+                isPlayerTurn = false;
+                playerType = "[컴퓨터]";
+                bool isComputerDoing = false;
+
+                Console.WriteLine("{0}의 턴", playerType);
+                // 컴퓨터는 간단한 룰
+                // { 1. 중앙이 비어 있으면 선점
+                if (isComputerDoing == false)
+                {
+                    if (gameBoard[1, 1].Equals((int)TicTacToePlayerType.NONE))
+                    {
+                        gameBoard[1, 1] = (int)TicTacToePlayerType.COMPUTER;
+                        isComputerDoing = true;
+                    }       // if: 중앙이 비어 있는 경우
+                    else { /* Do nothing */ }
+                }       // if: 컴퓨터가 아직 아무것도 하지 않은 경우
+                else { /* Do nothing */ }
+                // } 1. 중앙이 비어 있으면 선점
+
+                // { 2. 적당히 빈 자리 찾아서 착수
+                if (isComputerDoing == false)
+                {
+                    for (int y = 0; y <= gameBoard.GetUpperBound(0); y++)
+                    {
+                        for (int x = 0; x <= gameBoard.GetUpperBound(1); x++)
+                        {
+                            if (isComputerDoing == false &&
+                                gameBoard[y, x].Equals((int)TicTacToePlayerType.NONE))
+                            {
+                                gameBoard[y, x] = (int)TicTacToePlayerType.COMPUTER;
+                                isComputerDoing = true;
+                                break;
+                            }       // if: 서치한 자리가 비어있는 경우
+                            else { continue; }
+                        }       // loop: Search horizontal
+                    }       // loop: Search vertical
+                }       // if: 컴퓨터가 아직 아무것도 하지 않은 경우
+                else { /* Do nothing */ }
+                // } 2. 적당히 빈 자리 찾아서 착수
+
+                // { 컴퓨터의 턴 진행을 보드에 출력한다
+                for (int y = 0; y <= gameBoard.GetUpperBound(0); y++)
+                {
+                    Console.WriteLine("---|---|---");
+                    for (int x = 0; x <= gameBoard.GetUpperBound(1); x++)
+                    {
+                        switch (gameBoard[y, x])
+                        {
+                            case (int)TicTacToePlayerType.PLAYER:
+                                playerIcon = "O";
+                                break;
+                            case (int)TicTacToePlayerType.COMPUTER:
+                                playerIcon = "X";
+                                break;
+                            default:
+                                playerIcon = " ";
+                                break;
+                        }       // switch
+                        Console.Write(" {0} ", playerIcon);
+
+                        // Print Separator
+                        if (x == gameBoard.GetUpperBound(1)) { /* Do nothing */ }
+                        else { Console.Write("|"); }
+                    }       // loop: 한 줄에서 출력할 내용을 연산한다
+                    Console.WriteLine();
+                }       // loop
+                Console.WriteLine("---|---|---");
+                // } 컴퓨터의 턴 진행을 보드에 출력한다
+
+                // { 게임이 끝났는지 보드 검사
+                Console.WriteLine();
+                isGameOver = false;
+                for (int y = 0; y <= gameBoard.GetUpperBound(0); y++)
+                {
+                    if (gameBoard[y, 0].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                        gameBoard[y, 1].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                        gameBoard[y, 2].Equals((int)TicTacToePlayerType.COMPUTER))
+                    {
+                        isGameOver = true;
+                    }
+                    else { continue; }
+                }       // loop: 가로 방향으로 검사
+
+                for (int x = 0; x <= gameBoard.GetUpperBound(1); x++)
+                {
+                    if (gameBoard[0, x].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                        gameBoard[1, x].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                        gameBoard[2, x].Equals((int)TicTacToePlayerType.COMPUTER))
+                    {
+                        isGameOver = true;
+                    }
+                    else { continue; }
+                }       // loop: 세로 방향으로 검사
+
+                // 대각선 방향으로 검사
+                if (gameBoard[0, 0].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                    gameBoard[1, 1].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                    gameBoard[2, 2].Equals((int)TicTacToePlayerType.COMPUTER))
+                {
+                    isGameOver = true;
+                }
+                if (gameBoard[0, 2].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                    gameBoard[1, 1].Equals((int)TicTacToePlayerType.COMPUTER) &&
+                    gameBoard[2, 0].Equals((int)TicTacToePlayerType.COMPUTER))
+                {
+                    isGameOver = true;
+                }
+                // } 게임이 끝났는지 보드 검사
+            }       // loop: 틱택토 게임 루프
+
+            // 누가 이겼는지 출력
+            Console.WriteLine("{0}의 승리!", playerType);
+        }       // TicTacToeGame()
         #endregion      // #region Chapter 02 Lab
     }       // Program class
 }
