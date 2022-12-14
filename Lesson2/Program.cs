@@ -14,7 +14,7 @@ namespace Lesson2
     {
         static void Main(string[] args)
         {
-            TicTacToeGame();
+            MineGame();
         }
 
         //! 제어문 소개
@@ -860,6 +860,625 @@ namespace Lesson2
             // 누가 이겼는지 출력
             Console.WriteLine("{0}의 승리!", playerType);
         }       // TicTacToeGame()
+
+        /**
+         * 지뢰 찾기
+         * 10 x 10 보드에 지뢰를 숨김 (n% 확률로 지뢰 매설)
+         * debug mode 에서 지뢰가 아닌 곳은 .(닷), 지뢰인 곳은 #(샵)으로 표현
+         * play mode 에서 확인 되지 않은 곳은 전부 □(스퀘어) 로 표현
+         * 첫 턴에 지뢰를 밟으면 해당 칸에 지뢰를 지워 줌
+         */
+        public static void MineGame()
+        {
+            Random randomMine = new Random();
+            const int MINE_PERCENTAGE = 30;
+            const int BOARD_SIZE_X = 5;
+            const int BOARD_SIZE_Y = 5;
+
+            bool isDebugMode = true;
+            bool isGameOver = false;
+            bool isPlayerWin = false;
+            int playerTurnCnt = 0;
+
+            // 10 x 10 보드에 지뢰 초기화한다
+            /*
+             * gameBoard 상태
+             *  지뢰: MINE_PERCENTAGE 미만의 값
+             * 빈 칸: MINE_PERCENTAGE 이상의 값
+             * 
+             * playBoard 상태
+             * -2: 지뢰 있음
+             * -1: 초기값
+             *  n: 주변 9타일 이내에 지뢰 수 (0일 경우 ■ 표기, 양수일 경우 정수 표기)
+             *  
+             * mineCntBoard 상태
+             * -1: 지뢰 있음
+             *  n: 주변 9타일 이내에 지뢰 수
+             */
+            int[,] gameBoard = new int[BOARD_SIZE_Y, BOARD_SIZE_X];
+            int[,] playBoard = new int[BOARD_SIZE_Y, BOARD_SIZE_X];
+            int[,] mineCntMap = new int[BOARD_SIZE_Y, BOARD_SIZE_X];
+            for(int y = 0; y < BOARD_SIZE_Y; y++)
+            {
+                for(int x = 0; x < BOARD_SIZE_X; x++)
+                {
+                    gameBoard[y, x] = randomMine.Next(1, 100 + 1);
+                    playBoard[y, x] = -1;
+
+                    if (gameBoard[y, x] < MINE_PERCENTAGE)
+                    {
+                        mineCntMap[y, x] = -1;
+                        //playBoard[y, x] = -2;
+                    }       // if: 지뢰가 셋업된 경우
+                    else
+                    {
+                        mineCntMap[y, x] = 0;
+                        //playBoard[y, x] = -1;
+                    }       // else: 지뢰가 없는 경우
+                }
+            }       // loop: 지뢰를 초기화
+
+            // 게임 시작
+            while (isGameOver == false)
+            {
+                // { 현재 보드의 상태를 플레이 시점으로 보여준다
+                for (int y = 0; y < BOARD_SIZE_Y; y++)
+                {
+                    for (int x = 0; x < BOARD_SIZE_X; x++)
+                    {
+                        switch (playBoard[y, x])
+                        {
+                            case -2:
+                                Console.Write("X".PadRight(3, ' '));
+                                break;
+                            case -1:
+                                Console.Write("□".PadRight(2, ' '));
+                                break;
+                            case 0:
+                                Console.Write("■".PadRight(2, ' '));
+                                break;
+                            default:
+                                Console.Write("{0}".PadRight(5, ' '), playBoard[y, x]);
+                                break;
+                        }       // switch
+                    }       // loop
+                    Console.WriteLine();
+                }       // loop: 현재 보드의 상태를 출력
+                Console.WriteLine();
+                // } 현재 보드의 상태를 플레이 시점으로 보여준다
+
+                int playerX = 0;
+                int playerY = 0;
+                bool isLocationValid = false;
+                // { 플레이어 좌표 입력
+                while (isLocationValid == false)
+                {
+                    Console.Write("[플레이어] x 좌표 입력: ");
+                    int.TryParse(Console.ReadLine(), out playerX);
+                    Console.Write("[플레이어] y 좌표 입력: ");
+                    int.TryParse(Console.ReadLine(), out playerY);
+
+                    // 플레이어가 입력한 좌표의 유효성을 검사한다
+                    isLocationValid =
+                        (0 <= playerX && playerX < BOARD_SIZE_X) &&
+                        (0 <= playerY && playerY < BOARD_SIZE_Y);
+                    if (isLocationValid == false)
+                    {
+                        Console.WriteLine("{0} {1}", "[System] 해당 좌표는 유효하지 않습니다.",
+                            "다른 좌표를 입력하세요 \n");
+                        continue;
+                    }       // if: 좌표를 잘못 입력한 경우
+
+                    // 플레이 보드에서 선택 가능한지 검사한다
+                    isLocationValid = isLocationValid && playBoard[playerY, playerX].Equals(-1);
+                    if (isLocationValid == false)
+                    {
+                        Console.WriteLine("{0} {1}", "[System] 해당 좌표는 이미 오픈되었습니다.",
+                            "다른 좌표를 입력하세요. \n");
+                        continue;
+                    }       // if: 오픈된 좌표를 선택한 경우
+                }       // loop
+                playerTurnCnt++;
+                // } 플레이어 좌표 입력
+
+                // 현재 첫 턴이라면 해당 좌표에 지뢰가 있어도 지워준다
+                if (playerTurnCnt.Equals(1))
+                {
+                    gameBoard[playerY, playerX] = MINE_PERCENTAGE + 1;
+                    mineCntMap[playerY, playerX] = 0;
+                    playBoard[playerY, playerX] = -1;
+
+                    // { 지뢰의 수를 세어서 지도를 생성한다
+                    for (int y = 0; y < BOARD_SIZE_Y; y++)
+                    {
+                        for (int x = 0; x < BOARD_SIZE_X; x++)
+                        {
+                            // 지뢰가 없는 곳은 넘어간다
+                            if (mineCntMap[y, x].Equals(-1) == false) { continue; }
+
+                            // 지뢰 주변 9타일에 수를 1씩 추가한다
+                            bool isSearchTileValid = false;
+                            for (int searchY = y - 1; searchY <= y + 1; searchY++)
+                            {
+                                for (int searchX = x - 1; searchX <= x + 1; searchX++)
+                                {
+                                    // 유효하지 않은 좌표는 패스한다
+                                    isSearchTileValid =
+                                        (0 <= searchX && searchX < BOARD_SIZE_X) &&
+                                        (0 <= searchY && searchY < BOARD_SIZE_Y);
+                                    if (isSearchTileValid == false) { continue; }
+                                    // 9타일 서치 중에 지뢰가 있다면 패스한다
+                                    if (mineCntMap[searchY, searchX].Equals(-1)) { continue; }
+
+                                    mineCntMap[searchY, searchX]++;
+                                }
+                            }       // loop: 지뢰 주변 9타일을 찾는 루프
+                        }
+                    }       // loop: 게임 보드를 순회하는 루프
+                            // } 지뢰의 수를 세어서 지도를 생성한다
+                }       // if: 첫 턴인 경우
+
+                // { 선택한 좌표에서 지뢰를 검사한다
+                if (gameBoard[playerY, playerX] < MINE_PERCENTAGE)
+                {
+                    isGameOver = true;
+                    isPlayerWin = false;
+                    playBoard[playerY, playerX] = -2;
+                }       // if: 지뢰를 선택한 경우
+                else
+                {
+                    // { 선택한 타일 인근 9칸의 숫자를 오픈한다
+                    bool isSearchTileValid = false;
+                    for (int searchY = playerY - 1; searchY <= playerY + 1; searchY++)
+                    {
+                        for (int searchX = playerX - 1; searchX <= playerX + 1; searchX++)
+                        {
+                            // 유효하지 않은 좌표는 패스한다
+                            isSearchTileValid =
+                                (0 <= searchX && searchX < BOARD_SIZE_X) &&
+                                (0 <= searchY && searchY < BOARD_SIZE_Y);
+                            if (isSearchTileValid == false) { continue; }
+
+                            if (mineCntMap[searchY, searchX].Equals(-1))
+                            {
+                                playBoard[searchY, searchX] = -2;
+                            }       // if: 지뢰인 경우
+                            else
+                            {
+                                playBoard[searchY, searchX] = mineCntMap[searchY, searchX];
+                            }       // else: 지뢰 아닌 경우
+                        }
+                    }       // loop: 선택한 타일 인근 9칸을 순회하는 루프
+                            // } 선택한 타일 인근 9칸의 숫자를 오픈한다
+                }       // else: 빈 땅을 선택한 경우
+                        // } 선택한 좌표에서 지뢰를 검사한다
+
+                // { 게임 승리 조건을 검사한다
+                int unknownTileCnt = 0;
+                for (int y = 0; y < BOARD_SIZE_Y; y++)
+                {
+                    // 오픈되지 않은 타일이 있는 경우 게임을 이어서 진행한다
+                    if (0 < unknownTileCnt) { break; }
+
+                    for (int x = 0; x < BOARD_SIZE_X; x++)
+                    {
+                        // 오픈되지 않은 타일이 있는 경우 게임을 이어서 진행한다
+                        if (0 < unknownTileCnt) { break; }
+
+                        if (playBoard[y, x].Equals(-1) &&
+                            mineCntMap[y, x].Equals(-1) == false)
+                        {
+                            unknownTileCnt++;
+                        }       // if: 아직 오픈할 타일이 존재하고, 해당 타일이 지뢰가 아닌 경우
+                    }
+                }       // loop: 플레이 보드를 순회하는 루프
+                if (unknownTileCnt.Equals(0))
+                {
+                    isGameOver = true;
+                    isPlayerWin = true;
+                }
+                // } 게임 승리 조건을 검사한다
+
+                // { 게임 종료 조건을 검사한다
+                if (isGameOver) { break; }
+                // } 게임 종료 조건을 검사한다
+
+                if (isDebugMode)
+                {
+                    // { 현재 보드의 상태를 숫자 지도로 보여준다
+                    Console.WriteLine();
+                    for (int y = 0; y < BOARD_SIZE_Y; y++)
+                    {
+                        for (int x = 0; x < BOARD_SIZE_X; x++)
+                        {
+                            Console.Write("{0} ", mineCntMap[y, x]);
+                        }
+                        Console.WriteLine();
+                    }       // loop: 현재 보드의 상태를 출력
+                            // } 현재 보드의 상태를 숫자 지도로 보여준다
+
+                    // { 현재 보드의 상태를 보여준다
+                    Console.WriteLine();
+                    for (int y = 0; y < BOARD_SIZE_Y; y++)
+                    {
+                        for (int x = 0; x < BOARD_SIZE_X; x++)
+                        {
+                            if (gameBoard[y, x] < MINE_PERCENTAGE)
+                            {
+                                Console.Write("# ");
+                            }
+                            else
+                            {
+                                Console.Write(". ");
+                            }
+                        }
+                        Console.WriteLine();
+                    }       // loop: 현재 보드의 상태를 출력
+                    Console.WriteLine();
+                    // } 현재 보드의 상태를 보여준다
+                }       // if: 디버그 모드
+            }       // loop: 게임 루프
+
+            // { 현재 보드의 상태를 플레이 시점으로 보여준다
+            Console.WriteLine();
+            for (int y = 0; y < BOARD_SIZE_Y; y++)
+            {
+                for (int x = 0; x < BOARD_SIZE_X; x++)
+                {
+                    switch (playBoard[y, x])
+                    {
+                        case -2:
+                            Console.Write("X".PadRight(3, ' '));
+                            break;
+                        case -1:
+                            Console.Write("□".PadRight(2, ' '));
+                            break;
+                        case 0:
+                            Console.Write("■".PadRight(2, ' '));
+                            break;
+                        default:
+                            Console.Write("{0}".PadRight(5, ' '), playBoard[y, x]);
+                            break;
+                    }       // switch
+                }       // loop
+                Console.WriteLine();
+            }       // loop: 현재 보드의 상태를 출력
+            Console.WriteLine();
+            // } 현재 보드의 상태를 플레이 시점으로 보여준다
+
+            if (isPlayerWin)
+            {
+                Console.WriteLine("[플레이어] 지뢰를 모두 찾고 승리했습니다.");
+            }
+            else
+            {
+                Console.WriteLine("[플레이어] 지뢰를 밟고 패배했습니다.");
+            }
+        }       // MineGame()
         #endregion      // #region Chapter 02 Lab
+
+        #region Chapter 02 programming exercise
+        /**
+         * 사용자로부터 2개의 문자열을 읽어서 같은지 다른지 출력하는 프로그램
+         * 단, string.Equals() 등 기존에 제공되는 문자열 메서드로 처리하면 안됨.
+         * 반드시 루프를 사용할 것
+         */
+        public static void IsStringSame()
+        {
+            string strFirst = string.Empty;
+            string strSecond = string.Empty;
+
+            Console.Write("첫 번째 문자열: ");
+            strFirst = Console.ReadLine();
+            Console.Write("두 번째 문자열: ");
+            strSecond = Console.ReadLine();
+
+            bool isSameStr = true;
+            if (strFirst.Length.Equals(strSecond.Length) == false) { isSameStr = false; }
+            else
+            {
+                for (int index = 0; index < strFirst.Length; index++)
+                {
+                    if (strFirst[index] == strSecond[index]) { continue; }
+                    else
+                    {
+                        isSameStr = false;
+                        break;
+                    }
+                }       // loop: 문자열의 길이만큼 루프
+            }       // else: 두 문자열의 길이가 같은 경우
+
+            if(isSameStr)
+            {
+                Console.WriteLine("2개의 문자열은 같습니다.");
+            }
+            else
+            {
+                Console.WriteLine("2개의 문자열은 다릅니다.");
+            }
+        }       // IsStringSame()
+
+        /**
+         * 5개의 음료를 판매하는 자동판매기 머신
+         * 사용자는 1~5 사이의 숫자를 입력. 음료수를 선택.
+         * 사용자가 선택한 음료를 출력. 1~5 이외의 숫자를 선택하면
+         * "오류. 선택이 유효하지 않습니다. 돈을 반환합니다."라는 내용을 출력.
+         * (콜라, 물, 스프라이트, 주스, 커피)
+         */
+        public static void DrinkVendingMachine()
+        {
+            int pickedDrink = 0;
+            Console.WriteLine("콜라, 물, 스프라이트, 주스, 커피 중에서 하나를 선택하세요.");
+            Console.Write("(1. 콜라, 2. 물, 3. 스프라이트, 4. 주스, 5. 커피): ");
+            int.TryParse(Console.ReadLine(), out pickedDrink);
+
+            switch(pickedDrink)
+            {
+                case 1:
+                    Console.WriteLine("콜라를 선택하였습니다.");
+                    break;
+                case 2:
+                    Console.WriteLine("물을 선택하였습니다.");
+                    break;
+                case 3:
+                    Console.WriteLine("스프라이트를 선택하였습니다.");
+                    break;
+                case 4:
+                    Console.WriteLine("주스를 선택하였습니다.");
+                    break;
+                case 5:
+                    Console.WriteLine("커피를 선택하였습니다.");
+                    break;
+                default:
+                    Console.WriteLine("오류. 선택이 유효하지 않습니다. 돈을 반환합니다.");
+                    break;
+            }       // switch
+        }       // DrinkVendingMachine()
+
+        /**
+         * 배열 days[]를 아래와 같이 초기화하고 배열 요소의 값을 다음과 같이 출력하는 프로그램
+         * {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+         * ex) "7월은 31일까지 있습니다."
+         */
+        public static void MonthAndDays()
+        {
+            int[] days = new int[] { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+            
+            for(int index = 0; index < days.Length; index++)
+            {
+                Console.WriteLine($"{index + 1}월은 {days[index]}일까지 있습니다.");
+            }       // loop
+        }       // MonthAndDays()
+
+        /**
+         * 사용자가 정수를 5번 입력하는 프로그램
+         * 5를 한번도 입력하지 않은 경우 "인내심이 강합니다. 사용자 승" 출력
+         * 5를 입력한 경우 "5를 입력하였군요! 컴퓨터 승" 출력
+         */
+        public static void InputNumber5()
+        {
+            int number = 0;
+            bool isPlayerWin = true;
+
+            for (int index = 0; index < 5; index++)
+            {
+                Console.Write("정수를 입력하시오: ");
+                int.TryParse(Console.ReadLine(), out number);
+
+                if(number.Equals(5))
+                {
+                    isPlayerWin = false;
+                    break;
+                }
+                else { continue; }
+            }       // loop
+
+            if (isPlayerWin)
+            {
+                Console.WriteLine("인내심이 강합니다. 사용자 승");
+            }
+            else
+            {
+                Console.WriteLine("5를 입력하였군요! 컴퓨터 승");
+            }
+        }       // InputNumber5()
+
+        /**
+         * 사용자로부터 정수를 입력받아서 계속 더하는 프로그램
+         * 사용자가 0을 입력하면 지금까지 입력된 모든 정수의 합을 출력하고 종료
+         */
+        public static void SumOfNumbers()
+        {
+            int number = 0;
+            int sumOfNumbers = 0;
+
+            while (true)
+            {
+                Console.Write("정수를 입력하시오: ");
+                int.TryParse(Console.ReadLine(), out number);
+
+                if (number.Equals(0)) { break; }
+                else { /* Do nothing */ }
+                sumOfNumbers += number;
+            }       // loop
+            Console.WriteLine("합계: {0}", sumOfNumbers);
+        }       // SumOfNumbers()
+
+        /**
+         * 계단식으로 숫자를 출력하는 프로그램
+         * ex)
+         * 1******
+         * 12*****
+         * ...
+         * 1234567
+         */
+        public static void CascadeNumbers()
+        {
+            for(int y = 0; y < 7; y++)
+            {
+                for(int x = 0; x < 7; x++)
+                {
+                    if(y < x)
+                    {
+                        Console.Write("*");
+                    }
+                    else
+                    {
+                        Console.Write($"{x + 1}");
+                    }
+                }
+                Console.WriteLine();
+            }       // loop
+        }       // CascadeNumbers()
+
+        /**
+         * 1~100 까지의 자연수 중에서 3의 배수를 출력
+         */
+        public static void MultipleThree()
+        {
+            for(int index = 1; index <= 100; index++)
+            {
+                if(index % 3 == 0)
+                {
+                    Console.Write("{0} ", index);
+                }
+                else { /* Do nothing */ }
+
+                if(index % 30 == 0)
+                {
+                    Console.WriteLine();
+                }
+                else { /* Do nothing */ }
+            }       // loop
+        }       // MultipleThree()
+
+        /**
+         * 사용자가 입력한 정수의 모든 약수를 화면에 출력하는 프로그램
+         */
+        public static void DivisorElements()
+        {
+            int number = 0;
+            Console.Write("정수를 입력하시오: ");
+            int.TryParse(Console.ReadLine(), out number);
+
+            int printCnt = 0;
+            for(int numberDivisor = number; 0 < numberDivisor; numberDivisor--)
+            {
+                if (printCnt % (10 + 1) == 0)
+                {
+                    Console.WriteLine();
+                    printCnt++;
+                }
+                else { /* Do nothing */ }
+
+                if (number % numberDivisor == 0)
+                {
+                    Console.Write("{0} ", numberDivisor);
+                    printCnt++;
+                }
+                else { continue; }
+            }       // loop: 약수를 찾는 루프
+        }       // DivisorElements()
+
+        /**
+         * 화시 온도 0도 ~ 100까지의 구간을 10도 간격으로
+         * 섭씨 온도로 환산하는 표를 출력하는 프로그램
+         * c = (f - 32.0) * 5.0 / 9.0
+         */
+        public static void FahrenheitToCelsius()
+        {
+            for(int fTemper = 0; fTemper <= 100; fTemper += 10)
+            {
+                Console.WriteLine("{0}{1:F2}", $"{fTemper}".PadRight(8, ' '),
+                    (fTemper - 32.0F) * 5.0F / 9.0F);
+            }
+        }       // FahrenheitToCelsius()
+
+        /**
+         * 피타고라스의 정리
+         * 직각 삼각형에서 빗변의 길이 c에 대해서 직각을 낀 두 변 a, b 일 때
+         * a^2 + b^2 = c^2
+         * 각 변의 길이가 100보다 작은 삼각형 중에서 피타고라스의 정리가 성립하는 삼각형은
+         * 몇 개가 있는지?
+         */
+        public static void PythagorasTriangle()
+        {
+            Console.WriteLine("피타고라스의 정리가 성립하는 삼각형 \n");
+
+            for(int sideA = 1; sideA <= 100; sideA++)
+            {
+                for(int sideB = 1; sideB <= 100; sideB++)
+                {
+                    for(int hypotenus = 1; hypotenus <= 100; hypotenus++)
+                    {
+                        if((sideA * sideA + sideB * sideB).Equals(hypotenus * hypotenus))
+                        {
+                            Console.WriteLine("{0} {1} {2}", sideA, sideB, hypotenus);
+                            break;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }       // loop: 빗변의 길이가 맞는지 확인한다
+                }
+            }       // loop
+        }       // PythagorasTriangle()
+
+        /**
+         * 임의의 정수 n을 입력받음
+         * 1~n 각 수의 제곱을 모두 더한 값을 출력
+         */
+        public static void SumOfCascadeSquare()
+        {
+            int number = 0;
+            int sumOfValues = 0;
+            Console.Write("임의의 정수 N의 값을 입력: ");
+            int.TryParse(Console.ReadLine(), out number);
+
+            for(int index = 1; index <= number; index++)
+            {
+                sumOfValues += (index * index);
+            }       // loop
+            Console.WriteLine("계산값은 {0}입니다.", sumOfValues);
+        }       // SumOfCascadeSquare()
+
+        /**
+         * 3-6-9 게임
+         * 1~100까지 수를 센다. 중간에 3의 배수가 나오면 "박수" 출력
+         * 나머지 수는 그냥 숫자로 출력
+         */
+        public static void TheGame369()
+        {
+            for(int index = 1; index <= 100; index++)
+            {
+                if(index % 3 == 0)
+                {
+                    Console.Write("박수 ");
+                }
+                else
+                {
+                    Console.Write("{0} ", index);
+                }
+
+                if(index % 20 == 0)
+                {
+                    Console.WriteLine();
+                }
+                else { /* Do nothing */ }
+            }       // loop
+        }       // TheGame369()
+
+        /**
+         * 피보나치 수열을 계산하는 프로그램
+         * 피보나치 수열은 0과 1부터 시작하며 앞의 두 수를 더하여 뒤의 수를 만든다
+         */
+        public static void FibonacciNumbers()
+        {
+            //int fibonacciRank
+            //Console.Write("몇 항까지 구할까요: ");
+            
+        }       // FibonacciNumbers()
+        #endregion      // Chapter 02 programming exercise
     }       // Program class
 }
